@@ -1,0 +1,38 @@
+{
+  "log": { "loglevel": "warning" },
+  "dns": { "servers": ["localhost"], "queryStrategy": "UseIPv4" },
+  "inbounds": [
+    {
+      "tag": "reality",
+      "listen": "0.0.0.0",
+      "port": 443,
+      "protocol": "vless",
+      "settings": {
+        "clients": [ { "id": "<UUID>", "flow": "xtls-rprx-vision" } ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "dest": "<伪装站域名>:443",
+          "serverNames": ["<伪装站域名>"],
+          "privateKey": "<xray x25519 生成的 PrivateKey>",
+          "shortIds": ["<openssl rand -hex 8>"]
+        }
+      },
+      "sniffing": { "enabled": true, "destOverride": ["http", "tls", "quic"], "routeOnly": true }
+    }
+  ],
+  "outbounds": [
+    { "tag": "direct", "protocol": "freedom", "settings": { "domainStrategy": "UseIPv4" } },
+    { "tag": "block", "protocol": "blackhole" }
+  ],
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      { "type": "field", "ip": ["geoip:private"], "outboundTag": "block" },
+      { "type": "field", "protocol": ["bittorrent"], "outboundTag": "block" }
+    ]
+  }
+}
